@@ -1,6 +1,3 @@
-
-#Project_dataset_1 <- read("Project_dataset (1).xlsx", col_names = FALSE)
-#install.packages("MSQC")
 library(readxl)
 library(ggplot2)
 library(MSQC)
@@ -41,17 +38,18 @@ pcaCharts <- function(x) {
 
 
 ### Screeplot
-pdf(file= "PC Analysis - screeplot.pdf" )
+
+#pdf(file= "PC Analysis - screeplot.pdf" )
 
 project2.PCA <- princomp(Project2, cor = FALSE)
 var_explained = project2.PCA$sdev^2 / sum(project2.PCA$sdev^2)
 pcaCharts(project2.PCA)
 
-dev.off() 
+#dev.off() 
 
 ### MDL Analysis
 
-pdf(file= "PC Analysis - MDL.pdf" )
+#pdf(file= "PC Analysis - MDL.pdf" )
 
 eigen_values <- eigen(S)$values
 MDL<-c(rep(0,208))
@@ -68,11 +66,11 @@ plot(l,MDL, xlab = "l", ylab = "MDL", col="red",)
 optimum_MDL<-which.min(MDL)
 optimum_MDL
 
-dev.off()
+#dev.off()
 
 #---- PCA Analysis using Covariance ----
 
-pdf(file= "PCA Cov.pdf" )
+#pdf(file= "PCA Cov.pdf" )
 par(mfrow=c(2,2))
 
 p <- 4   #no of PC used
@@ -107,21 +105,15 @@ var_explained2 = project2.PCA2$sdev^2 / sum(project2.PCA2$sdev^2)
 sum(var_explained2[1:p])
 sum(var_explained[1:p])
 
-dev.off()
+#dev.off()
 
 #---- mCUSUM Analysis ---- 
 
-### Choose k and h
-
-
-
-###
 #pdf(file= "mCUSUM.pdf" )
 par(mfrow=c(2,2))
 
 k <- list(0.5,0.7,1.0,1.2,1.5, 1.7, 2)  # various values of k tested.
 
-#for (j in 1:7){
 
   Project3 <- as.matrix.data.frame(Project1)
   Project3.centered <- scale(Project3, scale = F, center = T)
@@ -144,7 +136,7 @@ var_explained.cusum = project3.PCA$sdev^2 / sum(project3.PCA$sdev^2)
 #print("iteration = ", j)
 print(dim(Project3.centered))
 print(sum(var_explained.cusum[1:p]))
-#}
+
 #dev.off()
-####### Performace 
+
 

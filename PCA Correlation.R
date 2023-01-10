@@ -1,39 +1,36 @@
 
-#Project_dataset_1 <- read("Project_dataset (1).xlsx", col_names = FALSE)
-#install.packages("MSQC")
 library(readxl)
 library(ggplot2)
 library(MSQC)
 Project_dataset_1 <- read_excel("C:/Users/gawal/Downloads/project_dataset.xlsx", col_names = FALSE)
-Project1 <- as.matrix.data.frame(Project_dataset_1)
-Project2 <- as.matrix.data.frame(Project1)
-### check the range of variables in dataset
+dataset1 <- as.matrix.data.frame(Project_dataset_1)
+dataset2 <- as.matrix.data.frame(dataset1)
 
-# for(j in 1:209){
-# print(c(range(Project2[,j]),j))
-# }
+? ## check the range of variables in dataset
 
-# for(j in 1:209){
-#   print(c(max(Project2[,j])-min(Project2[,j]),j))
-# }
+#for(j in 1:209){
+#  print(c(range(dataset2[,j]),j))
+#}
 
-#---- Initialize variables ----
+#for(j in 1:209){
+#   print(c(max(dataset2[,j])-min(dataset2[,j]),j))
+#}
 
-UCL<- NULL
-LCL<- NULL
+##---- Initialize variables ----
+
+UCL<- NULL   #Upper Control Limit
+LCL<- NULL   #Lower Control Limit
 y<- NULL
-out_up<-NULL
-out_low<-NULL
+out_up<-NULL  #Outlier - Above UCL
+out_low<-NULL #Outlier - below LCL
 
-n<- nrow(Project2)
-p<- ncol(Project2)
+n<- nrow(dataset2)
+p<- ncol(dataset2)
+S <- cov(dataset2)
+print(n)
 
-S <- cov(Project2)
-eigen(S)$vectors
 
-prcomp(Project2)$rotation
-
-#---- Decide number of Principle components ----
+##---- Decide number of Principle components ----
 
 
 pcaCharts <- function(x) {
@@ -51,29 +48,29 @@ pcaCharts <- function(x) {
 }
 
 
+## Screeplot
 
-### Screeplot
-pdf(file= "PC Analysis Cor - screeplot.pdf" )
+#pdf(file= "PC Analysis Cor - screeplot.pdf" )
 
-project2.PCA <- prcomp(Project2, scale. = TRUE)
-variance <- (project2.PCA$sdev)^2
+dataset2.PCA <- prcomp(dataset2, scale. = TRUE)
+variance <- (dataset2.PCA$sdev)^2
 var_explained = variance / sum(variance)
-pcaCharts(project2.PCA)
+pcaCharts(dataset2.PCA)
 
-dev.off() 
+#dev.off() 
 
-### MDL Analysis
+## MDL Analysis
 
 #pdf(file= "PC Analysis Cor - MDL.pdf" )
 
-MDL<-c(rep(0,208))
-l<- c(1:208)
-for (k in 1:208)
+MDL<-c(rep(0,(p-1)))
+l<- c(1:(p-1))
+for (k in 1:(p-1))
 {
   
-  al<- mean(variance[(k+1):209]) 
-  gl<- exp(mean(log(variance[(k+1):209])))
-  MDL[k]<- n*(209-k)*log(al/gl)+k*(2*209-k)*log(n)/2
+  al<- mean(variance[(k+1):p]) 
+  gl<- exp(mean(log(variance[(k+1):p])))
+  MDL[k]<- n*(p-k)*log(al/gl)+k*(2*p-k)*log(n)/2
   
 }
 plot(l,MDL, xlab = "l", ylab = "MDL", col="red",)
@@ -82,23 +79,23 @@ optimum_MDL
 
 #dev.off()
 
-#---- PCA Analysis using Covariance ----
+## ---- PCA Analysis using Covariance ----
 
-pdf(file= "PCA Cor.pdf" )
+#pdf(file= "PCA Cor.pdf" )
+
 par(mfrow=c(2,2))
-
-p <- 4   #no of PC used
+pc <- 4   #no of PC used
 
 for (j in 1:30){
 
-  n<- nrow(Project2)        # no of rows
-  #S = cor(Project2)
+  n<- nrow(dataset2)        # no of rows
+  #S = cor(dataset2)
   x1<- matrix(1:n,nrow = 1,ncol = n)
-  project2.PCA <- prcomp(Project2, scale = TRUE)
-  variance <- project2.PCA$sdev^2
-  scores <- project2.PCA$x
+  dataset2.PCA <- prcomp(dataset2, scale = TRUE)
+  variance <- dataset2.PCA$sdev^2
+  scores <- dataset2.PCA$x
   
-  for (i in 1:p){
+  for (i in 1:pc){
     UCL[i]<- 3*sqrt(variance[i])
     LCL[i]<- -3*sqrt(variance[i])
     out_up[i]<-list(which(t(scores[,i])>UCL[i]))
@@ -112,35 +109,33 @@ for (j in 1:30){
   list(outliers)
   if (is.null(outliers) | length(outliers)==0)
     break
-  Project2<-Project2[-outliers,]
+  dataset2<-dataset2[-outliers,]
   print(outliers)
 }
-dim(Project2)
-project2.PCA2 <- prcomp(Project2, scale = TRUE)
-var_explained2 = project2.PCA2$sdev^2 / sum(project2.PCA2$sdev^2)
-sum(var_explained2[1:p])
-sum(var_explained[1:p])
+dim(dataset2)
+dataset2.PCA2 <- prcomp(dataset2, scale = TRUE)
+var_explained2 = dataset2.PCA2$sdev^2 / sum(dataset2.PCA2$sdev^2)
+sum(var_explained2[1:pc])
+sum(var_explained[1:pc])
 UCL
 LCL
-dev.off()
+#dev.off()
 
 #---- mCUSUM Analysis ---- 
 
-pdf(file= "mCUSUM cor.pdf" )
+#pdf(file= "mCUSUM cor.pdf" )
+
 par(mfrow=c(2,2))
 
-#k <- list(0.5,0.7,1.0,1.2,1.5, 1.7, 2)  # various values of k tested.
 
-#for (j in 1:7){
-
-  Project3 <- as.matrix.data.frame(Project1)
-  project3.PCA <- prcomp(Project3, scale = TRUE)
+Project3 <- as.matrix.data.frame(dataset1)
+project3.PCA <- prcomp(Project3, scale = TRUE)
 
 
   for (i in 1:10){
     
     project3.PCA <- prcomp(Project3, scale = TRUE)
-    df.pca <- project3.PCA$x[,1:p]
+    df.pca <- project3.PCA$x[,1:pc]
     df.pca <- as.data.frame(df.pca)
     mcusum <- mult.chart(x = df.pca, type = "mcusum2", alpha=0.000027, k = 1, h = 20, method = "sw")
     outliers.cusum <- which(mcusum$t2 > mcusum$ucl)
@@ -152,8 +147,8 @@ par(mfrow=c(2,2))
 var_explained.cusum = project3.PCA$sdev^2 / sum(project3.PCA$sdev^2)
 #print("iteration = ", j)
 print(dim(Project3))
-print(sum(var_explained.cusum[1:p]))
+print(sum(var_explained.cusum[1:pc]))
 #}
-dev.off()
+#dev.off()
 
 
